@@ -96,7 +96,7 @@ public:
     // Specific BxDF subclasses can (and should) override this.
     virtual float Pdf(const Vector3f &wo, const Vector3f &wi) const;
 
-                                            //Bitwise AND. This is not a reference.
+    //Bitwise AND. This is not a reference.
     bool MatchesFlags(BxDFType t) const { return (type & t) == type; }
 
     const BxDFType type;
