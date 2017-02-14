@@ -2,7 +2,7 @@
 
 float SquarePlane::Area() const
 {
-    //TODO in a later assignment
+    //TODO
     return 0.f;
 }
 
@@ -27,6 +27,10 @@ void SquarePlane::ComputeTBN(const Point3f &P, Normal3f *nor, Vector3f *tan, Vec
 {
     *nor = glm::normalize(transform.invTransT() * Normal3f(0,0,1));
     //TODO: Compute tangent and bitangent
+    Vector3f b = Vector3f(0.f, 1.f, 0.f);
+    Vector3f t = Vector3f(1.f, 0.f, 0.f);
+    *tan = glm::normalize(transform.invT * t);
+    *bit = glm::normalize(transform.invT * b);
 }
 
 

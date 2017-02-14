@@ -2,8 +2,8 @@
 
 float Disc::Area() const
 {
-    //TODO in a later assignment
-    return 0;
+    //TODO
+    return 0.f;
 }
 
 bool Disc::Intersect(const Ray &ray, Intersection *isect) const
@@ -28,8 +28,11 @@ void Disc::ComputeTBN(const Point3f &P, Normal3f *nor, Vector3f *tan, Vector3f *
 {
     *nor = glm::normalize(transform.invTransT() * Normal3f(0,0,1));
     //TODO: Compute tangent and bitangent
+    Vector3f b = Vector3f(0.f, 1.f, 0.f);
+    Vector3f t = Vector3f(1.f, 0.f, 0.f);
+    *tan = glm::normalize(transform.invT * t);
+    *bit = glm::normalize(transform.invT * b);
 }
-
 
 Point2f Disc::GetUVCoordinates(const Point3f &point) const
 {

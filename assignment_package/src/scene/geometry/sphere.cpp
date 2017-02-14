@@ -4,14 +4,18 @@
 
 float Sphere::Area() const
 {
-    //TODO in a later assignment
-    return 0.f;
+    //TODO later
 }
 
 void Sphere::ComputeTBN(const Point3f& P, Normal3f* nor, Vector3f* tan, Vector3f* bit) const
 {
     *nor = glm::normalize(transform.invTransT() * glm::normalize(P));
     //TODO: Compute tangent and bitangent
+    Vector3f oB = Vector3f(0.f, 1.f, 0.f);
+    Vector3f t = glm::cross(oB, oN);
+    Vector3f b = glm::cross(oN, t);
+    *bit = glm::normalize(transform.invT * b);
+    *tan = glm::normalize(transform.invT * glm::cross(b, oN));
 }
 
 bool Sphere::Intersect(const Ray &ray, Intersection *isect) const
