@@ -21,20 +21,11 @@ void BSDF::UpdateTangentSpaceMatrices(const Normal3f& n, const Vector3f& t, cons
     worldToTangent = glm::inverse(tangentToWorld);
 }
 
-BxDF* select(float x, BxDFType type, int *index) {
-    std::vector<BxDF*> arr;
-    for (int i = 0; i < bxdfs.length; i++) {
-        if (bxdfs[i]->MatchesFlags(type)) arr.push_back(bxdfs[i]);
-    }
-    index = int(x)%arr.length;
-    return bxdfs[index];
-}
-
 Color3f BSDF::f(const Vector3f &woW, const Vector3f &wiW, BxDFType flags /*= BSDF_ALL*/) const
 {
     //TODO
     Color3f sum = Color3f(0.f);
-    for (int i = 0; i < bsdfs.length; i++) {
+    for (int i = 0; i < numBxDFs; i++) {
         if (bxdfs[i]->MatchesFlags(flags)) {
             Vector3f woT = worldToTangent * woW;
             Vector3f wiT = worldToTangent * wiW;
@@ -49,33 +40,34 @@ Color3f BSDF::Sample_f(const Vector3f &woW, Vector3f *wiW, const Point2f &xi,
 {
     // Use the input random number _xi_ to select
     // one of our BxDFs that matches the _type_ flags.
-    int *i;
-    BxDF* selection = select(xi.x, type, i);
+    std::vector<BxDF*> arr;
+    for (int i = 0; i < numBxDFs; i++) {
+        if (bxdfs[i]->MatchesFlags(type)) arr.push_back(bxdfs[i]);
+    }
+    int index = int(xi.x)%arr.size();
+    BxDF* selection = bxdfs[index];
 
-    // After selecting our random BxDF, rewrite the first uniform
-    // random number contained within _xi_ to another number within
-    // [0, 1) so that we don't bias the _wi_ sample generated from
-    // BxDF::Sample_f.
-    xi.x = xi.x * numBxDFs - i;
+    // rewrite the random number contained in _xi_ to another number
+    Point2f u = Point2f(xi.x * numBxDFs - index, xi.y);
 
     // Convert woW and wiW into tangent space and pass them to
     // the chosen BxDF's Sample_f (along with pdf).
     // Store the color returned by BxDF::Sample_f and convert
     // the _wi_ obtained from this function back into world space.
     Vector3f woT = worldToTangent * woW;
-    Vector3f* wiT;
-    float* pdf_sum = 0.f;
-    Color3f c = selection->Sample_f(woT,wiT,xi,pdf_sum,sampledType);
-    wiW = tangentToWorld * wiT;
+    Vector3f wiT;
+    *pdf = 0;
+    selection->Sample_f(woT,&wiT,u,pdf,sampledType);
+    *wiW = tangentToWorld * wiT;
 
     // Iterate over all BxDFs that we DID NOT select above (so, all
     // but the one sampled BxDF) and add their PDFs to the PDF we obtained
     // from BxDF::Sample_f, then average them all together.
-    pdf = BSDF::Pdf(woW, wiW, type);
+    *pdf = Pdf(woW, *wiW, type);
 
     // Finally, iterate over all BxDFs and sum together the results of their
     // f() for the chosen wo and wi, then return that sum.
-    return BSDF::f(woW, wiW, type);
+    return f(woW, *wiW, type);
 }
 
 
@@ -84,12 +76,12 @@ float BSDF::Pdf(const Vector3f &woW, const Vector3f &wiW, BxDFType flags) const
     //TODO
     int num = 0;
     float sum = 0.f;
-    for (int i = 0; i < bsdfs.length; i++) {
-        if (bsdfs[i]->MatchesFlags(flags)) {
+    for (int i = 0; i < numBxDFs; i++) {
+        if (bxdfs[i]->MatchesFlags(flags)) {
             num++;
             Vector3f woT = worldToTangent * woW;
             Vector3f wiT = worldToTangent * wiW;
-            sum += bsdfs[i]->Pdf(woT, wiT);
+            sum += bxdfs[i]->Pdf(woT, wiT);
         }
     }
     return sum;
@@ -99,10 +91,12 @@ Color3f BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &xi,
                        Float *pdf, BxDFType *sampledType) const
 {
     //TODO
-    if (sampledType != nullptr) sampledType = type;
-    wi = WarpFunctions::squareToHemisphereUniform(xi);
-    pdf = BxDF::Pdf(wo, wi);
-    return BxDF::f(wo,wi);
+    if (sampledType) *sampledType = type;
+    Vector3f w = WarpFunctions::squareToHemisphereUniform(xi);
+    Vector3f temp;
+    *wi = w;
+    *pdf = Pdf(wo, w);
+    return f(wo,w);
 }
 
 // The PDF for uniform hemisphere sampling

@@ -9,13 +9,15 @@ float Sphere::Area() const
 
 void Sphere::ComputeTBN(const Point3f& P, Normal3f* nor, Vector3f* tan, Vector3f* bit) const
 {
+    Vector4f oN = Vector4f(glm::normalize(P), 0.f);
     *nor = glm::normalize(transform.invTransT() * glm::normalize(P));
     //TODO: Compute tangent and bitangent
+
     Vector3f oB = Vector3f(0.f, 1.f, 0.f);
-    Vector3f t = glm::cross(oB, oN);
-    Vector3f b = glm::cross(oN, t);
-    *bit = glm::normalize(transform.invT * b);
-    *tan = glm::normalize(transform.invT * glm::cross(b, oN));
+    Vector3f t = glm::cross(oB, Vector3f(oN));
+    Vector3f b = glm::cross(Vector3f(oN), t);
+    *bit = Vector3f(glm::normalize(transform.invT() * Vector4f(b,0.f)));
+    *tan = Vector3f(glm::normalize(transform.invT() * Vector4f(glm::cross(b, Vector3f(oN)),0.f)));
 }
 
 bool Sphere::Intersect(const Ray &ray, Intersection *isect) const
