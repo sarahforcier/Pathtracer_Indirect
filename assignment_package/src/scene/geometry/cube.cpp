@@ -75,8 +75,16 @@ bool Cube::Intersect(const Ray& r, Intersection* isect) const
 
 void Cube::ComputeTBN(const Point3f& P, Normal3f* nor, Vector3f* tan, Vector3f* bit) const
 {
-    *nor = glm::normalize(transform.invTransT() * GetCubeNormal(P));
     //TODO: Compute tangent and bitangent
+    int idx = glm::abs(GetFaceIndex(Point3f(P)));
+    Normal3f N(0.f);
+    Vector3f T(0.f);
+    N[idx] = glm::sign(P[idx]);
+    T[(idx + 1)%3] = N[idx];
+    Vector3f B = glm::cross(N, T);
+    *nor = glm::normalize(transform.invTransT() * N);
+    *tan = Vector3f(glm::normalize(transform.T() * Vector4f(T, 0.f)));
+    *bit = Vector3f(glm::normalize(transform.T() * Vector4f(B, 0.f)));
 }
 
 glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point) const
