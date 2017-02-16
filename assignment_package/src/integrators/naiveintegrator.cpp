@@ -19,9 +19,9 @@ Color3f NaiveIntegrator::Li(const Ray &ray, const Scene &scene, std::shared_ptr<
 
             Color3f c = isect.bsdf->Sample_f(woW, &wiW, xi, &pdf);
             Color3f li = Li(isect.SpawnRay(glm::normalize(wiW)), scene, sampler, depth -1);
-            color +=  Le + c * li * glm::dot(wiW, isect.normalGeometric)/pdf;
+            if (pdf < 0.0000001) li = Color3f(0.f);
+            color =  Le + c * li * glm::dot(wiW, isect.normalGeometric)/pdf;
         }
-
     }
     return color;
 }

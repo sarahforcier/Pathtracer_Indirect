@@ -29,8 +29,8 @@ void SquarePlane::ComputeTBN(const Point3f &P, Normal3f *nor, Vector3f *tan, Vec
     //TODO: Compute tangent and bitangent
     Vector3f b = Vector3f(0.f, 1.f, 0.f);
     Vector3f t = Vector3f(1.f, 0.f, 0.f);
-    *bit = Vector3f(glm::normalize(transform.invT() * Vector4f(b,0.f)));
-    *tan = Vector3f(glm::normalize(transform.invT() * Vector4f(t,0.f)));
+    *bit = Vector3f(glm::normalize(transform.T() * Vector4f(b,0.f)));
+    *tan = Vector3f(glm::normalize(transform.T() * Vector4f(t,0.f)));
 }
 
 

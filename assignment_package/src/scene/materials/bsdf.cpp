@@ -10,7 +10,7 @@ BSDF::BSDF(const Intersection& isect, float eta /*= 1*/)
       numBxDFs(0),
       bxdfs{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}
 {
-    UpdateTangentSpaceMatrices(isect.tangent, isect.bitangent, normal);
+    UpdateTangentSpaceMatrices(normal, isect.tangent, isect.bitangent);
 }
 
 
@@ -18,7 +18,7 @@ void BSDF::UpdateTangentSpaceMatrices(const Normal3f& n, const Vector3f& t, cons
 {
     //TODO: Update worldToTangent and tangentToWorld based on the normal, tangent, and bitangent
     tangentToWorld = Matrix3x3(t, b, n);
-    worldToTangent = glm::inverse(tangentToWorld);
+    worldToTangent = glm::transpose(tangentToWorld);
 }
 
 Color3f BSDF::f(const Vector3f &woW, const Vector3f &wiW, BxDFType flags /*= BSDF_ALL*/) const
@@ -84,7 +84,7 @@ float BSDF::Pdf(const Vector3f &woW, const Vector3f &wiW, BxDFType flags) const
             sum += bxdfs[i]->Pdf(woT, wiT);
         }
     }
-    return sum;
+    return sum/num;
 }
 
 Color3f BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &xi,
@@ -93,7 +93,6 @@ Color3f BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &xi,
     //TODO
     if (sampledType) *sampledType = type;
     Vector3f w = WarpFunctions::squareToHemisphereUniform(xi);
-    Vector3f temp;
     *wi = w;
     *pdf = Pdf(wo, w);
     return f(wo,w);

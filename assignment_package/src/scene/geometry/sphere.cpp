@@ -16,8 +16,8 @@ void Sphere::ComputeTBN(const Point3f& P, Normal3f* nor, Vector3f* tan, Vector3f
     Vector3f oB = Vector3f(0.f, 1.f, 0.f);
     Vector3f t = glm::cross(oB, Vector3f(oN));
     Vector3f b = glm::cross(Vector3f(oN), t);
-    *bit = Vector3f(glm::normalize(transform.invT() * Vector4f(b,0.f)));
-    *tan = Vector3f(glm::normalize(transform.invT() * Vector4f(glm::cross(b, Vector3f(oN)),0.f)));
+    *bit = Vector3f(glm::normalize(transform.T() * Vector4f(b,0.f)));
+    *tan = Vector3f(glm::normalize(transform.T() * Vector4f(glm::cross(b, Vector3f(oN)),0.f)));
 }
 
 bool Sphere::Intersect(const Ray &ray, Intersection *isect) const
