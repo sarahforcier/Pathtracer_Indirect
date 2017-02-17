@@ -20,6 +20,5 @@ Color3f LambertBRDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u
 float LambertBRDF::Pdf(const Vector3f &wo, const Vector3f &wi) const
 {
     //TODO
-    //return SameHemisphere(wo,wi) ? WarpFunctions::squareToHemisphereCosinePDF(wi):0;
-    return WarpFunctions::squareToHemisphereCosinePDF(wi);
+    return SameHemisphere(wo,wi) ? WarpFunctions::squareToHemisphereCosinePDF(wi):0;
 }

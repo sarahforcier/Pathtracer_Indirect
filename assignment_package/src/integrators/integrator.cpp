@@ -13,10 +13,10 @@ void Integrator::Render()
     // For every pixel in the FilmTile:
     for(Point2i pixel : tilePixels)
     {
-        ///Uncomment this to debug a particular pixel within this tile
-//        if(pixel.x != 200 && pixel.y != 200)
+        //Uncomment this to debug a particular pixel within this tile
+//        if(pixel.x == 160 && pixel.y == 145)
 //        {
-//            continue;
+//            std::cout << "";
 //        }
         Color3f pixelColor(0.f);
         // Ask our sampler for a collection of stratified samples, then raycast through each sample
